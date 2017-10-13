@@ -25,7 +25,32 @@ public class StatisticsConstants {
      public static final String STUDENT_INFO_XLSX_PATH = LIB_PATH + "/student_info" + POINT + OFFICE_EXCEL_2010_POSTFIX;
      public static final String NOT_EXCEL_FILE = " : Not the Excel file!";
      public static final String PROCESSING = "Processing...";
+     public static final String RN = "\n";
      
+     public static final int NUM_SHEET = 30;//Sheet数量
+     public static final int NUM_ROW = 32;//Row数量
+     public static final int NUM_COLUMN = 11;//Column数量
+     
+     public static final int START_NUM = 4;//数据起始行
+     public static final int END_NUM = 32;//数据结束行
+     public static final int SELL_NUM = 20;//销售量行数
+     
+     public static final int JUMP_NUM_16= 16;//二.煤炭销售（万吨）行数
+     public static final int JUMP_NUM_21= 21;//三.仓存（万吨）  
+     public static final int JUMP_NUM_22= 22;//三.仓存（万吨）  
+     public static final int JUMP_NUM_23= 23;
+     public static final int JUMP_NUM_24= 24; 
+     public static final int JUMP_NUM_25= 25;
+     public static final int JUMP_NUM_26= 26; 
+     public static final int JUMP_NUM_27= 27;
+     //错误信息
+     public static final String NUM_SHEET_ERROR = "表格数量和标准不符合";
+     public static final String NUM_ROW_ERROR = "数据行和标准不符合";
+     public static final String NUM_COLUMN_ERROR = "数据行和标准不符合";
+     public static final String NUM_SHEET_ERROR_SHOW = "错误表格:";
+     public static final String NUM_ROW_ERROR_SHOW = "错误行数:";
+     public static final String NUM_CELL_ERROR_SHOW = "错误单元格:";
+     public static final String ERROR_NUMBER = "非数值数据";
      //Excel文字
      public static final String ExcelTitle = "矿业公司生产统计日报";
      public static final String ExcelProjectShow = "项      目";

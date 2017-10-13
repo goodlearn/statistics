@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import statistics.excel.ReadExcel;
 import statistics.utils.StatisticsConstants;
 
 public class MainFrame {
@@ -68,33 +69,36 @@ public class MainFrame {
 
     //浜嬩欢鐩戝惉
     private void mainEvent() {
-    	// 鎵撳紑鑿滃崟椤圭洃鍚�
+    	
+    	//事件监听
         openItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 
-                openDialog.setVisible(true);//鏄剧ず鎵撳紑鏂囦欢瀵硅瘽妗�
+            	String filePath = null;//文件路径
+            	String dirpath = null;//文件目录
+            	String fileName = null;//文件名
+            	String showError = null;//错误信息
+            	
+                openDialog.setVisible(true);//对话框可见
                 
-                String dirpath = openDialog.getDirectory();//鑾峰彇鎵撳紑鏂囦欢璺緞骞朵繚瀛樺埌瀛楃涓蹭腑銆�
-                String fileName = openDialog.getFile();//鑾峰彇鎵撳紑鏂囦欢鍚嶇О骞朵繚瀛樺埌瀛楃涓蹭腑
+                dirpath = openDialog.getDirectory();//文件目录
+                fileName = openDialog.getFile();//文件名
                 
-                if (dirpath == null || fileName == null)//鍒ゆ柇璺緞鍜屾枃浠舵槸鍚︿负绌�
+                if (dirpath == null || fileName == null)//参数判断
                     return;
                 else
-                	textArea.setText(null);//鏂囦欢涓嶄负绌猴紝娓呯┖鍘熸潵鏂囦欢鍐呭銆�
-                file = new File(dirpath, fileName);//鍒涘缓鏂扮殑璺緞鍜屽悕绉�
-
+                	textArea.setText(null);//重置显示
+                file = new File(dirpath, fileName);//生成文件
+                filePath = file.getAbsolutePath();//文件路径
+                
                 try {
-                    BufferedReader bufr = new BufferedReader(new FileReader(file));//灏濊瘯浠庢枃浠朵腑璇讳笢瑗�
-                    String line = null;//鍙橀噺瀛楃涓插垵濮嬪寲涓虹┖
-                    while ((line = bufr.readLine()) != null) {
-                    	textArea.append(line + "\r\n");//鏄剧ず姣忎竴琛屽唴瀹�
-                    }
-                    bufr.close();//鍏抽棴鏂囦欢
-                } catch (FileNotFoundException e1) {
-                    // 鎶涘嚭鏂囦欢璺緞鎵句笉鍒板紓甯�
-                    e1.printStackTrace();
-                } catch (IOException e1) {
-                    // 鎶涘嚭IO寮傚父
+                	ReadExcel readExcel = new ReadExcel();
+                	showError = readExcel.readExcel(filePath);//是否有错误信息
+                	if(null!=showError) {
+                		textArea.append(showError + "\r\n");
+                		return;
+                	}
+                }catch (Exception e1) {
                     e1.printStackTrace();
                 }
             }
