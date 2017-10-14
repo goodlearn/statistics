@@ -20,7 +20,7 @@ public class Test {
 		
 		//创建窗体
 		private void createFrame() {
-			MainFrame mainFrame = new MainFrame();
+			MainFrm mainFrame = new MainFrm();
 		}
 		
 		//数据库连接

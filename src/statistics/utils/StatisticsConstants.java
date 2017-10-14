@@ -16,6 +16,8 @@ public class StatisticsConstants {
 	 public static final String FileMenuCloseName = "关闭";
 	
 	 //Excel
+	 
+	 public static final String NULL_VALUE = "无";
 	 public static final String OFFICE_EXCEL_2003_POSTFIX = "xls";
      public static final String OFFICE_EXCEL_2010_POSTFIX = "xlsx";
      public static final String EMPTY = "";
@@ -28,25 +30,26 @@ public class StatisticsConstants {
      public static final String RN = "\n";
      
      public static final int NUM_SHEET = 30;//Sheet数量
-     public static final int NUM_ROW = 32;//Row数量
+     public static final int NUM_ROW = 33;//Row数量
      public static final int NUM_COLUMN = 11;//Column数量
      
      public static final int START_NUM = 4;//数据起始行
      public static final int END_NUM = 32;//数据结束行
-     public static final int SELL_NUM = 20;//销售量行数
+     public static final int SELL_NUM = 21;//销售量行数
+     public static final int CK_HJ_25= 26; 
      
-     public static final int JUMP_NUM_16= 16;//二.煤炭销售（万吨）行数
+     public static final int JUMP_NUM_15= 15;//二.煤炭销售（万吨）行数
+     public static final int JUMP_NUM_20= 20;//三.仓存（万吨）  
      public static final int JUMP_NUM_21= 21;//三.仓存（万吨）  
-     public static final int JUMP_NUM_22= 22;//三.仓存（万吨）  
-     public static final int JUMP_NUM_23= 23;
-     public static final int JUMP_NUM_24= 24; 
-     public static final int JUMP_NUM_25= 25;
-     public static final int JUMP_NUM_26= 26; 
-     public static final int JUMP_NUM_27= 27;
+     public static final int JUMP_NUM_22= 22;
+     public static final int JUMP_NUM_23= 23; 
+     public static final int JUMP_NUM_24= 24;
+     public static final int JUMP_NUM_25= 25; 
+     public static final int JUMP_NUM_26= 26;
      //错误信息
      public static final String NUM_SHEET_ERROR = "表格数量和标准不符合";
      public static final String NUM_ROW_ERROR = "数据行和标准不符合";
-     public static final String NUM_COLUMN_ERROR = "数据行和标准不符合";
+     public static final String NUM_COLUMN_ERROR = "数据列和标准不符合";
      public static final String NUM_SHEET_ERROR_SHOW = "错误表格:";
      public static final String NUM_ROW_ERROR_SHOW = "错误行数:";
      public static final String NUM_CELL_ERROR_SHOW = "错误单元格:";

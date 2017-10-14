@@ -30,7 +30,13 @@ public class ReadExcel {
     
 	private List<DailyEntity> dailyEntities = null;
 	
-    /**
+	
+	
+    public List<DailyEntity> getDailyEntities() {
+		return dailyEntities;
+	}
+
+	/**
      * read the Excel file
      * @param path the path of the Excel file
      * @return
@@ -66,6 +72,10 @@ public class ReadExcel {
     //检查Excel
     public String checkExcel(String path) {
     	StringBuffer errMsg = new StringBuffer();//错误信息
+    	int endNum = 0;//行数
+		int endColumn = 0;//列数
+		String sheetName = null;//表格名字
+		int executeRow = 0;//执行行数
     	/**
     	 * 错误规则
     	 * 1、表格数量和标准不符合（暂定为30）
@@ -84,8 +94,7 @@ public class ReadExcel {
     	try {
     		System.out.println(StatisticsConstants.PROCESSING + path);
     		
-    		int endNum = 0;
-    		String sheetName = null;//表格名字
+    		
     		//读取Excel
     		InputStream is = new FileInputStream(path);
     	    XSSFWorkbook xssfWorkbook = new XSSFWorkbook(is);
@@ -108,7 +117,8 @@ public class ReadExcel {
 	          
 	          sheetName = xssfSheet.getSheetName();//表格名字
 	          endNum = xssfSheet.getPhysicalNumberOfRows();//表格行数
-	          
+	          XSSFRow firstRow = xssfSheet.getRow(0);
+	          endColumn = firstRow.getLastCellNum();
 	          //表格数据行和标准不符合（暂定为32）
 	          if(endNum!=StatisticsConstants.END_NUM) {
 	        	  errMsg.append(StatisticsConstants.NUM_ROW_ERROR);
@@ -118,25 +128,30 @@ public class ReadExcel {
 	          }
 	          
 	        //表格数据列和标准不符合（暂定为11）
-	          if(endNum!=StatisticsConstants.NUM_COLUMN) {
+	          if(endColumn!=StatisticsConstants.NUM_COLUMN) {
 	        	  errMsg.append(StatisticsConstants.NUM_COLUMN_ERROR);
 	        	  errMsg.append(StatisticsConstants.RN);
 	        	  errMsg.append(StatisticsConstants.NUM_SHEET_ERROR_SHOW + sheetName);
 	    		  return errMsg.toString();
 	          }
 	          
-	          for (int rowNum = StatisticsConstants.START_NUM; rowNum <= StatisticsConstants.END_NUM; rowNum++) {
+	          for (int rowNum = StatisticsConstants.START_NUM; rowNum < StatisticsConstants.NUM_ROW; rowNum++) {
 	        	  	XSSFRow xssfRow = xssfSheet.getRow(rowNum);
+	        	  	executeRow = rowNum;//记录执行行数
 	                if (xssfRow != null) {
 	                	
+	                	XSSFCell cellData = xssfRow.getCell(0);
+	                	String stringValue = getValue(cellData);
+	                	System.out.println(stringValue);
+	                	
 	                	if(rowNum == StatisticsConstants.START_NUM||
-	                			rowNum == StatisticsConstants.JUMP_NUM_16||
+	                			rowNum == StatisticsConstants.JUMP_NUM_15||
+	                			rowNum == StatisticsConstants.JUMP_NUM_20||
 	                			rowNum == StatisticsConstants.JUMP_NUM_21||
-	                			rowNum == StatisticsConstants.JUMP_NUM_22||
+	                			rowNum == StatisticsConstants.JUMP_NUM_23||
 	                			rowNum == StatisticsConstants.JUMP_NUM_24||
 	                			rowNum == StatisticsConstants.JUMP_NUM_25||
-	                			rowNum == StatisticsConstants.JUMP_NUM_26||
-	                			rowNum == StatisticsConstants.JUMP_NUM_27) {
+	                			rowNum == StatisticsConstants.JUMP_NUM_26) {
 	                		/**
 	                		 * 一.采剥工程量 （ 万m3）  
 	                		 * 二.煤炭销售（万吨）
@@ -148,24 +163,21 @@ public class ReadExcel {
 	                	
 
 	                	//在销售量行数范围内
-	                	if(rowNum <= StatisticsConstants.SELL_NUM) {
+	                	if(rowNum < StatisticsConstants.SELL_NUM) {
 	                		String error = dayMonthYearNumberCheck(xssfRow,rowNum,sheetName);
 	                		if(null!=error) {
 	                			return error;
 	                		}
-	                	}
-	                	
-	                	//储煤量
-	                	if(rowNum <= StatisticsConstants.JUMP_NUM_23) {
+	                	}else if(rowNum > StatisticsConstants.SELL_NUM && 
+	                			rowNum < StatisticsConstants.CK_HJ_25) {
+	                		//储煤量
 	                		String error = cmlCheck(xssfRow,rowNum,sheetName);
 	                		if(null!=error) {
 	                			return error;
 	                		}
-	                	}
-	                	
-	                	//四.煤质化验
-	                	if(rowNum >= StatisticsConstants.JUMP_NUM_27&&
+	                	}else if(rowNum > StatisticsConstants.JUMP_NUM_26&&
 	                			rowNum <= StatisticsConstants.END_NUM) {
+	                		//四.煤质化验
 	                		String error = mzhjCheck(xssfRow,rowNum,sheetName);
 	                		if(null!=error) {
 	                			return error;
@@ -203,7 +215,7 @@ public class ReadExcel {
      */
     private String mzhjCheck(XSSFRow xssfRow,int rowNum,String sheetName) {
     	 String errMsg = null;//错误信息
-	   	 for(int i=1;i<12;i++) {
+	   	 for(int i=1;i<11;i++) {
 	   		 errMsg = checkCellNumber(xssfRow,rowNum,sheetName,i);
 		   	 if(null!=errMsg) {
 		   		 return errMsg;
@@ -286,35 +298,37 @@ public class ReadExcel {
     
     //单元格数字检查
     private String checkCellNumber(XSSFRow xssfRow,int rowNum,String sheetName,int cell) {
-    	 XSSFCell cellData = xssfRow.getCell(cell);
-    	 if(cellData.getCellType()!=XSSFCell.CELL_TYPE_NUMERIC) {
-        	 return getErrorSheetNameRowCell(sheetName,rowNum,cell);
-         }else {
-        	 String stringValue = cellData.getStringCellValue();
-        	 
-        	 //空值和空格可以存在 非空格数据有问题
-        	 if(null == stringValue) {
-        		 return null;
-        	 }
-        	 stringValue = stringValue.trim();
-        	 if(""!=stringValue) {
-            	 return getErrorSheetNameRowCell(sheetName,rowNum,cell);
-        	 }
-        	 
-         }
-    	 return null;
+    	try {
+    		 XSSFCell cellData = xssfRow.getCell(cell);
+        	 if(cellData.getCellType()!=XSSFCell.CELL_TYPE_NUMERIC) {
+        		 String stringValue = getValue(cellData);
+             	
+            	 //空值和空格可以存在 非空格数据有问题
+            	 if(null == stringValue) {
+            		 return null;
+            	 }
+            	 stringValue = stringValue.trim();
+            	 if("".equals(stringValue)) {
+                	 return null;
+            	 }
+            	 return getErrorSheetNameRowCell(StatisticsConstants.ERROR_NUMBER,sheetName,rowNum,cell);
+             }
+    	}catch(Exception e) {
+    		return getErrorSheetNameRowCell(e.getMessage(),sheetName,rowNum,cell);
+    	}
+    	return null;
     }
     
     //错误表名 行数 单元格数
-    private String getErrorSheetNameRowCell(String sheetName,int rowNum,int cell) {
+    private String getErrorSheetNameRowCell(String errorMsg,String sheetName,int rowNum,int cell) {
     	 StringBuffer errMsg = new StringBuffer();//错误信息
-    	 errMsg.append(StatisticsConstants.ERROR_NUMBER);
+    	 errMsg.append(errorMsg);
     	 errMsg.append(StatisticsConstants.RN);
     	 errMsg.append(StatisticsConstants.NUM_SHEET_ERROR_SHOW + sheetName);
     	 errMsg.append(StatisticsConstants.RN);
-    	 errMsg.append(StatisticsConstants.NUM_ROW_ERROR_SHOW + rowNum);
+    	 errMsg.append(StatisticsConstants.NUM_ROW_ERROR_SHOW + (rowNum + 1));
     	 errMsg.append(StatisticsConstants.RN);
-    	 errMsg.append(StatisticsConstants.NUM_CELL_ERROR_SHOW + cell);
+    	 errMsg.append(StatisticsConstants.NUM_CELL_ERROR_SHOW + cell );
     	 return errMsg.toString();
     }
     /**
@@ -343,15 +357,17 @@ public class ReadExcel {
             for (int rowNum = StatisticsConstants.START_NUM; rowNum <= StatisticsConstants.END_NUM; rowNum++) {
         	  	XSSFRow xssfRow = xssfSheet.getRow(rowNum);
                 if (xssfRow != null) {
-                	
+                	XSSFCell cellData = xssfRow.getCell(0);
+                	String stringValue = getValue(cellData);
+                	System.out.println(stringValue);
                 	if(rowNum == StatisticsConstants.START_NUM||
-                			rowNum == StatisticsConstants.JUMP_NUM_16||
+                			rowNum == StatisticsConstants.JUMP_NUM_15||
+                			rowNum == StatisticsConstants.JUMP_NUM_20||
                 			rowNum == StatisticsConstants.JUMP_NUM_21||
-                			rowNum == StatisticsConstants.JUMP_NUM_22||
+                			rowNum == StatisticsConstants.JUMP_NUM_23||
                 			rowNum == StatisticsConstants.JUMP_NUM_24||
                 			rowNum == StatisticsConstants.JUMP_NUM_25||
-                			rowNum == StatisticsConstants.JUMP_NUM_26||
-                			rowNum == StatisticsConstants.JUMP_NUM_27) {
+                			rowNum == StatisticsConstants.JUMP_NUM_26) {
                 		/**
                 		 * 一.采剥工程量 （ 万m3）  
                 		 * 二.煤炭销售（万吨）
@@ -364,15 +380,12 @@ public class ReadExcel {
                 	//在销售量行数范围内
                 	if(rowNum <= StatisticsConstants.SELL_NUM) {
                 		dailyEntity.getStrips().put(rowNum, createStrip(xssfRow, rowNum));
-                	}
-                	
+                	}else if(rowNum > StatisticsConstants.SELL_NUM && 
+            			rowNum < StatisticsConstants.CK_HJ_25) {
                 	//储煤量
-                	if(rowNum <= StatisticsConstants.JUMP_NUM_23) {
                 		dailyEntity.getRepositorys().put(rowNum, createRepository(xssfRow, rowNum));
-                	}
-                	
-                	//四.煤质化验
-                	if(rowNum >= StatisticsConstants.JUMP_NUM_27&&
+                	}else if(rowNum > StatisticsConstants.JUMP_NUM_26&&
+                			//四.煤质化验
                 			rowNum <= StatisticsConstants.END_NUM) {
                 		dailyEntity.getCoalQualityAnalysiss().put(rowNum, createMzhj(xssfRow, rowNum));
                 	}
@@ -407,11 +420,10 @@ public class ReadExcel {
 	   	XSSFCell klqqCoal = xssfRow.getCell(9);
 	   	//内蒙古华宁热电有限责任公司
 	   	XSSFCell hnrd = xssfRow.getCell(10);
-	    XSSFCell remark = xssfRow.getCell(9);//备注
 	   	 
 	    cqa.setName(getValue(name));
 	    cqa.setOrder(row);
-	    cqa.setRemark(getValue(remark));
+	    cqa.setRemark(StatisticsConstants.NULL_VALUE);
 	    cqa.setCoal1(getValue(coal1));
 	    cqa.setCoal2(getValue(coal2));
 	    cqa.setCoal3(getValue(coal3));
@@ -437,7 +449,7 @@ public class ReadExcel {
         XSSFCell coal3 = xssfRow.getCell(6);//3#煤
         XSSFCell coal7 = xssfRow.getCell(7);//7#储煤仓
         XSSFCell coal8 = xssfRow.getCell(8);//8#储煤仓
-        XSSFCell remark = xssfRow.getCell(9);//备注
+        XSSFCell remark = xssfRow.getCell(10);//备注
         rep.setName(getValue(name));
         rep.setOrder(row);
         rep.setRemark(getValue(remark));
@@ -469,7 +481,7 @@ public class ReadExcel {
         XSSFCell yearPlan = xssfRow.getCell(7);//计划
         XSSFCell yearFact = xssfRow.getCell(8);//实际
         
-        XSSFCell remark = xssfRow.getCell(9);//备注
+        XSSFCell remark = xssfRow.getCell(10);//备注
         
         strip.setOrder(row);//行数
         strip.setName(getValue(name));
