@@ -5,6 +5,12 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
@@ -16,7 +22,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import statistics.entity.DailyEntity;
+import statistics.entity.Strip;
+import statistics.excel.ReadExcel;
 import statistics.frame.CbAddFrame;
+import statistics.frame.DailyQueryCbFrame;
 import statistics.frame.FileDialogFrame;
 import statistics.frame.MclAddFrame;
 import statistics.frame.MzhjAddFrame;
@@ -139,12 +149,65 @@ public class MainFrm extends JFrame {
 			menuItem_exit.setIcon(new ImageIcon(MainFrm.class.getResource("/images/exit.png")));
 			menu.add(menuItem_exit);
 		}
-		private void menu2Init(JMenuBar menuBar) {
-			//数据操作
-			JMenu menu = new JMenu("数据操作");
-			menu.setIcon(new ImageIcon(MainFrm.class.getResource("/images/base.png")));
-			menuBar.add(menu);
+		
+		//查询菜单
+		private void menu2Query(JMenu menu) {
+			JMenu mnNewMenu = new JMenu("查询数据");
+			mnNewMenu.setIcon(new ImageIcon(MainFrm.class.getResource("/images/bookTypeManager.png")));
+			menu.add(mnNewMenu);
 			
+			JMenuItem menuItem = new JMenuItem("生产类别数据查询");
+			menuItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					FileDialogFrame fileDialogFrame = new FileDialogFrame();
+					String path = fileDialogFrame.openFile();
+					ReadExcel readExcel = new ReadExcel();
+					System.out.println(path);
+					String msgError = readExcel.checkExcel(path);
+					if(null == msgError) {
+						try {
+							 readExcel.readExcel(path);
+							 List<DailyEntity> dailyEntities = readExcel.getDailyEntities();
+							 DailyEntity dailyEntity = dailyEntities.get(0);//区第一个测试
+							 DailyQueryCbFrame addFrame = new DailyQueryCbFrame();
+							 addFrame.fillTableByMap(dailyEntity.getStrips());
+							 addFrame.setVisible(true);
+							 table.add(addFrame);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+						System.out.println(msgError);
+					}
+				}
+			});
+			menuItem.setIcon(new ImageIcon(MainFrm.class.getResource("/images/add.png")));
+			mnNewMenu.add(menuItem);
+			
+			JMenuItem menuMclItem = new JMenuItem("煤储量数据查询");
+			menuMclItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					MclAddFrame addFrame = new MclAddFrame();
+					addFrame.setVisible(true);
+					table.add(addFrame);
+				}
+			});
+			menuMclItem.setIcon(new ImageIcon(MainFrm.class.getResource("/images/add.png")));
+			mnNewMenu.add(menuMclItem);
+			
+			JMenuItem menuMzhjItem = new JMenuItem("煤质化验数据查询");
+			menuMzhjItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					MzhjAddFrame addFrame = new MzhjAddFrame();
+					addFrame.setVisible(true);
+					table.add(addFrame);
+				}
+			});
+			menuMzhjItem.setIcon(new ImageIcon(MainFrm.class.getResource("/images/add.png")));
+			mnNewMenu.add(menuMzhjItem);
+		}
+		
+		//添加菜单
+		private void menu2Add(JMenu menu) {
 			JMenu mnNewMenu = new JMenu("添加数据");
 			mnNewMenu.setIcon(new ImageIcon(MainFrm.class.getResource("/images/bookTypeManager.png")));
 			menu.add(mnNewMenu);
@@ -190,6 +253,16 @@ public class MainFrm extends JFrame {
 			});
 			menuItem_2.setIcon(new ImageIcon(MainFrm.class.getResource("/images/edit.png")));
 			mnNewMenu.add(menuItem_2);
+		}
+		
+		private void menu2Init(JMenuBar menuBar) {
+			//数据操作
+			JMenu menu = new JMenu("数据操作");
+			menu.setIcon(new ImageIcon(MainFrm.class.getResource("/images/base.png")));
+			menuBar.add(menu);
+			
+			menu2Add(menu);//添加菜单
+			menu2Query(menu);//查询菜单
 		}
 		
 		//内容面板样式
